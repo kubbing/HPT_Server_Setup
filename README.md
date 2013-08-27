@@ -122,9 +122,9 @@ Change lines:
 	PubkeyAuthentication yes
 	AuthorizedKeysFile     %h/.ssh/authorized_keys
 	PasswordAuthentication no
-	ClientAliveInterval 30
 	TCPKeepAlive yes
-	ClientAliveCountMax 99999
+	ClientAliveInterval 99999
+	ClientAliveCountMax 2
 	UsePAM no
 	
 - `service ssh reload`
@@ -160,6 +160,8 @@ This took less than 20s on my server :).
 ## Install rbenv, ruby-build
 
 As `deploy`:
+
+**Note:** put rbenv scripts into `.zshenv`; this way they will be available in all shells.
 
 - Install rbenv using guide [github](https://github.com/sstephenson/rbenv/).
 - Install rbenv-build using guide [github](https://github.com/sstephenson/ruby-build).
@@ -234,7 +236,7 @@ And add local computer hosts entry (`/etc/hosts`).
 	
 Test using `$ curl 'test.rails'` from local machine. You should receive couple of HTML lines of your new app.
 	
-# Database
+# Database PostgreSQL
 
 ## Install
 
@@ -268,7 +270,7 @@ Change lines (change localhosts to `trust`):
 - `rails generate scaffold Article title:string description:text`
 - Edit database config.
 
-New content of `config/database.yml` (indent using spaces!):
+New content of `config/database.yml` (**Note:** indent using spaces!):
 
 	development:
   	  adapter: postgresql
@@ -303,6 +305,102 @@ Create database and run migrations:
 - `RAILS_ENV=production rake db:migrate`
 - `sudo service nginx restart`
 - Test using `$ curl 'test.rails/articles.json'` from local machine. You should receive empty JSON array `[]`.
+
+# Capistrano Deployment
+
+As `deploy` on server:
+
+- `cd` into `~/.ssh`
+- `ssh-keygen -t rsa`
+- Upload `id_rsa.pub` to you git server ([github](http://www.github.com), [bitbucket](http://www.bitbucket.com))
+
+As `deploy` on local machine:
+
+- `cd` into your `test.rails` app in `/var/www/test.rails`.
+- Uncomment `capistrano` line in `Gemfile`
+- `bundle install`
+- `capify i`
+- Uncomment `assets` line in `Capfile`
+
+Edit `config/deploy.rb` with following:
+
+	require "bundler/capistrano"
+
+	set :scm, :git
+	set :repository, "git repo url similar to git@bitbucket..."
+	set :branch, "master"
+
+	set :domain, "<server_ip>"
+	set :rails_env, "production"
+	set :application, "<you_app_folder_name>"
+	set :deploy_to, "/var/www/#{application}"
+	
+	# This avoids deletion of `uploads` folder after deployment
+	set :shared_children, shared_children + %w{public/uploads} 
+
+	set :user, :deploy # our `deploy` user
+	set :use_sudo, false
+
+	server "#{domain}", :app, :web, :db, primary: true
+
+	# If you are using Passenger mod_rails uncomment this:
+	namespace :deploy do
+  		task :start do ; end
+  		task :stop do ; end
+  		task :restart, :roles => :app, :except => { :no_release => true } do
+    		run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
+  		end
+	end
+
+	namespace :deploy do
+		desc '*DANGER* Same as cold, but creates, migrates and seeds database correctly'
+		task :cold_db do
+			update
+			db_create
+			db_migrate
+			db_seed
+			start
+		end
+	end
+
+	namespace :deploy do
+		desc '*DANGER* Drops, recreates, migrates and seeds database'
+		task :db_all do
+		end
+
+		desc '*DANGER* Drops database'
+		task :db_drop do
+		 	run "cd #{current_path}; RAILS_ENV=#{rails_env} bundle exec rake db:drop;"
+		end
+
+		desc '*DANGER* Creates database'
+		task :db_create do
+		 	run "cd #{current_path}; RAILS_ENV=#{rails_env} bundle exec rake db:create;"
+		end
+
+		desc '*DANGER* Migrates database'
+		task :db_migrate do
+		 	run "cd #{current_path}; RAILS_ENV=#{rails_env} bundle exec rake db:migrate;"
+		end
+
+		desc '*DANGER* Seeds database'
+		task :db_seed do
+		 	run "cd #{current_path}; RAILS_ENV=#{rails_env} bundle exec rake db:seed;"
+		end
+	end
+
+	after "deploy:db_all", "deploy:stop", "deploy:db_drop", "deploy:db_create", "deploy:db_migrate", "deploy:db_seed", "deploy:start"
+	
+Now you are ready to deploy your application.
+
+- `cap deploy:setup`
+- `cap deploy:check`
+- `cap deploy:cold_db`
+
+The End.
+
+
+
 
 	
 	
