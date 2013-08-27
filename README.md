@@ -178,7 +178,7 @@ As `deploy` in `~`:
 - `gem list passenger --remote`
 - `$ gem install passenger`
 - `$ sudo which passenger-install-nginx-module`
-- Install Ubuntu service for passenger using [github](https://github.com/chloerei/nginx-init-ubuntu-passenger)
+- Install Ubuntu service for passenger using [github](https://github.com/chloerei/nginx-init-ubuntu-passenger).
 
 ### Test Nginx
 
@@ -247,7 +247,7 @@ Install database and create `deploy` user.
 - Edit `/etc/postgresql/9.1/main/postgresql.conf`, uncomment `listen_addresses = 'localhost'` line.
 - Edit `/etc/postgresql/9.1/main/pg_hba.conf`
 
-Change lines:
+Change lines (change localhosts to `trust`):
 
 	# "local" is for Unix domain socket connections only
 	local   all             all                                     trust
