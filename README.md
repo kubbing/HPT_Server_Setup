@@ -8,8 +8,11 @@ Install basic editor, git, browser and favorite shell.
 	
 	# aptitude install vim htop git mc lynx zsh
 	
-- Change hostname in `/etc/hostname` to your needs; changes apply after reboot.
+Change Hostname
+	
+- Change hostname in `/etc/hostname` to your needs.
 - Change hostname to the new one in `/ets/hosts` (line with `127.0.0.1`).
+- Changes apply after reboot.
 	
 ## Automatic Security Updates
 
@@ -37,7 +40,7 @@ Select to populate `.zshrc` with reasonable defaults.
 
 ## Set Up Zsh
 
-This is (imo) reasonable detaults i `~/.zshrc`.
+This is (imo) reasonable detaults in `~/.zshrc`.
 
 	export LC_CTYPE=en_US.UTF-8
 	export LC_ALL=en_US.UTF-8
