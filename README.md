@@ -123,8 +123,9 @@ Change lines:
 	AuthorizedKeysFile     %h/.ssh/authorized_keys
 	PasswordAuthentication no
 	TCPKeepAlive yes
-	ClientAliveInterval 99999
-	ClientAliveCountMax 2
+	TCPKeepAlive yes
+	ClientAliveInterval 60
+	ClientAliveCountMax 10
 	UsePAM no
 	
 - `service ssh reload`
