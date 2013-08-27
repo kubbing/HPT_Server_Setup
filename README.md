@@ -147,7 +147,7 @@ Add this entry:
 
 This took less than 20s on my server :).
 
-	# aptitude install build-essential libssl-dev zlib1g-dev libcurl4-openssl-dev sqlite3 libsqlite3-dev imagemagick libmagickwand-dev
+	# aptitude install build-essential libssl-dev zlib1g-dev libcurl4-openssl-dev imagemagick libmagickwand-dev
 
 ## Create `deploy` User
 
