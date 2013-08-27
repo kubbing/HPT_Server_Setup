@@ -1,5 +1,7 @@
 # First-time-login Steps
 
+Login as `root`.
+
 Update system.
 
 	# aptitude update && aptitude upgrade
