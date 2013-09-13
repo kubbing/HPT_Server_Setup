@@ -114,6 +114,9 @@ Minimalistic setup in `~/.vimrc`.
 - Generate keys on local machine in using `$ ssh-keygen -t rsa` (preferably in `~/.ssh`).
 - Check that your new user on server has `~/.ssh` folder create. If not, create it.
 - Still on local machine: `scp` your `id_rsa.pub` to `user@server:~/.ssh/authorized_keys`
+
+Now you should be able to login without password.
+
 - Now edit file `/etc/ssh/sshd_config` to disable password authentication:
 
 Change lines:
@@ -123,12 +126,11 @@ Change lines:
 	AuthorizedKeysFile     %h/.ssh/authorized_keys
 	PasswordAuthentication no
 	TCPKeepAlive yes
-	TCPKeepAlive yes
 	ClientAliveInterval 60
 	ClientAliveCountMax 10
 	UsePAM no
 	
-- `service ssh reload`
+- Reload ssh service on server using `# service ssh reload`
 - Change your local `~/.ssh/config`:
 
 Add this entry:
@@ -166,6 +168,8 @@ As `deploy`:
 
 - Install rbenv using guide [github](https://github.com/sstephenson/rbenv/).
 - Install rbenv-build using guide [github](https://github.com/sstephenson/ruby-build).
+- `$ $(SHELL) -l`
+- `$ rbenv rehash`
 	
 ## Install Ruby
 
@@ -173,6 +177,8 @@ As `deploy` in `~`:
 
 	$ rbenv install -l
 	$ rbenv install <version>
+	$ rbenv rehash
+	$ rbenv local <version> && rbenv global <version> && rbenv shell <version>
 
 ## Install Passenger and Nginx
 
