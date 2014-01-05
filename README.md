@@ -6,88 +6,38 @@ Update system.
 
 	# aptitude update && aptitude upgrade
 	
-Install basic editor, git, browser and favorite shell.
+Install basic editor, git, browser, shell and ssh, automatic updates.
 	
-	# aptitude install vim htop git mc lynx zsh
+	# aptitude install vim htop git mc lynx zsh openssh-server fail2ban unattended-upgrades
+	# dpkg-reconfigure -plow unattended-upgrades [y]
 	
-Change Hostname
+Change Hostname.
 	
 - Change hostname in `/etc/hostname` to your needs.
 - Change hostname to the new one in `/ets/hosts` (line with `127.0.0.1`).
 - Changes apply after reboot.
 	
-## Automatic Security Updates
-
-	# aptitude install unattended-upgrades
-	# dpkg-reconfigure -plow unattended-upgrades [y]
-	
-## Add User
+## Add Deploy User
 
 Add user and set password.
 
-1. `# useradd -m -d /home/<user> -s /bin/zsh <user>`
-- `# passwd <user>`
+1. `# useradd -m -d /home/deploy -s /bin/zsh deploy`
+- `# passwd deploy`
+- add `deploy` user to sudoers (`# visudo`)
 
-Add user to sudo. 
-
-- `# visudo` 
-- add line `<user> ALL=(ALL:ALL) ALL`
-- save as `/etc/sudoers`
-
-Login as new user.
+Login as `deploy`.
  
-- `# su <user>`
+	# su <user>
 
 Select to populate `.zshrc` with reasonable defaults.
 
 ## Set Up Zsh
 
-This is (imo) reasonable detaults in `~/.zshrc`.
-
-	export LC_CTYPE=en_US.UTF-8
-	export LC_ALL=en_US.UTF-8
-
-	autoload -U colors && colors
-
-	autoload -Uz promptinit
-	PROMPT="%n%{${fg[cyan]}%}@%{$reset_color%}%m %{${fg[yellow]}%}%1~%{$reset_color%} %{${fg[white]}%}$%{$reset_color%} "
-	promptinit
-
-	setopt histignorealldups sharehistory
-
-	# Use emacs keybindings even if our EDITOR is set to vi
-	bindkey -e
-
-	# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
-	HISTSIZE=1000
-	SAVEHIST=1000
-	HISTFILE=~/.zsh_history
-
-	# Use modern completion system
-	autoload -Uz compinit
-	compinit
-
-	zstyle ':completion:*' auto-description 'specify: %d'
-	zstyle ':completion:*' completer _expand _complete _correct _approximate
-	zstyle ':completion:*' format 'Completing %d'
-	zstyle ':completion:*' group-name ''
-	zstyle ':completion:*' menu select=2
-	eval "$(dircolors -b)"
-	zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-	zstyle ':completion:*' list-colors ''
-	zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
-	zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
-	zstyle ':completion:*' menu select=long
-	zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-	zstyle ':completion:*' use-compctl false
-	zstyle ':completion:*' verbose true
-
-	zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
-	zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+Clone the `oh-my-zsh` project. Use prompt style `bira`.
 
 ## Set Up Vim
 
-Minimalistic setup in `~/.vimrc`.
+Minimalistic setup in `~/.vimrc`. Do it using `$ cat > .vimrc`, paste following config and hit `^D`.
 	
 	" basics
 	
@@ -112,7 +62,7 @@ Minimalistic setup in `~/.vimrc`.
 ## Public Key Login
 	
 - Generate keys on local machine in using `$ ssh-keygen -t rsa` (preferably in `~/.ssh`).
-- Check that your new user on server has `~/.ssh` folder create. If not, create it.
+- Check whether your `deploy` user on server has `~/.ssh` folder created. If not, create it.
 - Still on local machine: `scp` your `id_rsa.pub` to `user@server:~/.ssh/authorized_keys`
 
 Now you should be able to login without password.
@@ -130,18 +80,16 @@ Change lines:
 	ClientAliveCountMax 10
 	UsePAM no
 	
-- Reload ssh service on server using `# service ssh reload`
-- Change your local `~/.ssh/config`:
+Reload ssh service on server using `# service ssh reload`.
 
-Add this entry:
+Change your local `~/.ssh/config` by adding following:
 
 	Host server
 	HostName	<ip_address>
 	User		<user>
 	IdentityFile ~/.ssh/id_rsa.pub
 	
-- Now login as new user `ssh server`
-- Profit!
+Now login as new user `ssh server`.
 	
 # Ruby, Nginx, Passenger
 
@@ -150,15 +98,6 @@ Add this entry:
 This took less than 20s on my server :).
 
 	# aptitude install build-essential libssl-dev zlib1g-dev libcurl4-openssl-dev imagemagick libmagickwand-dev
-
-## Create `deploy` User
-
-	# useradd -m -d /home/deploy -s /bin/zsh deploy
-	
-- You can setup `.zshrc` and `.vimrc` if you want.
-- You have to add `deploy` user to sudoers (`# visudo`) to install passenger.	
-- Set password for `deploy` user.
-- Login as `deploy`.
 
 ## Install rbenv, ruby-build
 
